@@ -18,8 +18,8 @@ export default function ShortenerForm() {
       return;
     }
     try {
-      const { data } = await axios.post('http://localhost:3000/shorten', { url });
-      setShortLinks((prev) => [data, ...prev]);
+     const { data } = await axios.post('https://url-shortener-backend-6666.onrender.com/shorten', { url });
+     setShortLinks((prev) => [data, ...prev]);
       setUrl('');
       setError('');
     } catch {
