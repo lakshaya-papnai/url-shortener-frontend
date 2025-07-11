@@ -8,6 +8,7 @@ export default function ShortenerForm() {
   const [error, setError] = useState('');
 
   const FRONTEND_BASE_URL = 'https://lakshaya-url.vercel.app'; // replace with your actual Vercel domain
+  const [isLoading, setIsLoading] = useState(false); // ✅ new loading state
 
   const handleShorten = async () => {
     if (shortLinks.length >= 5) {
@@ -21,6 +22,9 @@ export default function ShortenerForm() {
       return;
     }
 
+
+    setIsLoading(true); // 🟣 Start loading
+
     try {
       const { data } = await axios.post('https://url-shortener-backend-6666.onrender.com/shorten', { url });
 
@@ -28,10 +32,17 @@ export default function ShortenerForm() {
       const displayShort = `${FRONTEND_BASE_URL}/r/${slug}`;
 
       setShortLinks((prev) => [{ original: data.original, short: displayShort }, ...prev]);
+      const { data } = await axios.post(
+        'https://url-shortener-backend-6666.onrender.com/shorten',
+        { url }
+      );
+      setShortLinks((prev) => [data, ...prev]);
       setUrl('');
       setError('');
     } catch {
       setError('Failed to shorten URL.');
+    } finally {
+      setIsLoading(false); // 🟣 Stop loading
     }
   };
 
@@ -51,18 +62,30 @@ export default function ShortenerForm() {
         />
         <button
           onClick={handleShorten}
-          className="min-h-[3rem] sm:min-h-[3.5rem] px-6 bg-pink-600 hover:bg-pink-700 rounded-lg shadow-md text-white font-medium text-sm sm:text-base transition transform hover:scale-105 active:scale-95"
+          disabled={isLoading}
+          className={`min-h-[3rem] sm:min-h-[3.5rem] px-6 bg-pink-600 hover:bg-pink-700 rounded-lg shadow-md text-white font-medium text-sm sm:text-base transition transform hover:scale-105 active:scale-95 ${
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         >
           🔗 Shorten
         </button>
       </div>
 
+      {/* 🔄 Show loading message */}
+      {isLoading && (
+        <p className="mt-3 text-center text-sm text-pink-300 animate-pulse">
+          🔄 Shortening link...
+        </p>
+      )}
+
+      {/* 🚫 Error message */}
       {error && (
         <p className="mt-4 text-center text-xs sm:text-sm text-red-400 animate-shake">
           {error}
         </p>
       )}
 
+      {/* ✅ Shortened links list */}
       <div className="mt-6 sm:mt-8 space-y-4">
         {shortLinks.map((link, i) => (
           <ShortenedLink key={i} original={link.original} short={link.short} />
