@@ -7,7 +7,8 @@ export default function ShortenerForm() {
   const [shortLinks, setShortLinks] = useState([]);
   const [error, setError] = useState('');
 
-  const FRONTEND_BASE_URL = 'https://lakshaya-url.vercel.app'; // replace with your actual Vercel domain
+  const FRONTEND_BASE_URL = 'https://go-pi-five.vercel.app';
+
 
   const handleShorten = async () => {
     if (shortLinks.length >= 5) {
