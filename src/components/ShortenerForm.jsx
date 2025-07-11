@@ -6,7 +6,8 @@ export default function ShortenerForm() {
   const [url, setUrl] = useState('');
   const [shortLinks, setShortLinks] = useState([]);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // ✅ new loading state
+
+  const FRONTEND_BASE_URL = 'https://lakshaya-url.vercel.app'; // replace with your actual Vercel domain
 
   const handleShorten = async () => {
     if (shortLinks.length >= 5) {
@@ -20,26 +21,22 @@ export default function ShortenerForm() {
       return;
     }
 
-    setIsLoading(true); // 🟣 Start loading
-
     try {
-      const { data } = await axios.post(
-        'https://url-shortener-backend-6666.onrender.com/shorten',
-        { url }
-      );
-      setShortLinks((prev) => [data, ...prev]);
+      const { data } = await axios.post('https://url-shortener-backend-6666.onrender.com/shorten', { url });
+
+      const slug = data?.short?.split('/').pop(); // safely extract slug
+      const displayShort = `${FRONTEND_BASE_URL}/r/${slug}`;
+
+      setShortLinks((prev) => [{ original: data.original, short: displayShort }, ...prev]);
       setUrl('');
       setError('');
     } catch {
       setError('Failed to shorten URL.');
-    } finally {
-      setIsLoading(false); // 🟣 Stop loading
     }
   };
 
   return (
     <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl shadow-xl px-4 py-6 sm:px-6 sm:py-8 transition-all duration-300">
-
       <h1 className="ml-20 text-2xl sm:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">
         🔗 URL Shortener
       </h1>
@@ -54,30 +51,18 @@ export default function ShortenerForm() {
         />
         <button
           onClick={handleShorten}
-          disabled={isLoading}
-          className={`min-h-[3rem] sm:min-h-[3.5rem] px-6 bg-pink-600 hover:bg-pink-700 rounded-lg shadow-md text-white font-medium text-sm sm:text-base transition transform hover:scale-105 active:scale-95 ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          className="min-h-[3rem] sm:min-h-[3.5rem] px-6 bg-pink-600 hover:bg-pink-700 rounded-lg shadow-md text-white font-medium text-sm sm:text-base transition transform hover:scale-105 active:scale-95"
         >
           🔗 Shorten
         </button>
       </div>
 
-      {/* 🔄 Show loading message */}
-      {isLoading && (
-        <p className="mt-3 text-center text-sm text-pink-300 animate-pulse">
-          🔄 Shortening link...
-        </p>
-      )}
-
-      {/* 🚫 Error message */}
       {error && (
         <p className="mt-4 text-center text-xs sm:text-sm text-red-400 animate-shake">
           {error}
         </p>
       )}
 
-      {/* ✅ Shortened links list */}
       <div className="mt-6 sm:mt-8 space-y-4">
         {shortLinks.map((link, i) => (
           <ShortenedLink key={i} original={link.original} short={link.short} />
