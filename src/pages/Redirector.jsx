@@ -8,9 +8,14 @@ export default function Redirector() {
   useEffect(() => {
     async function redirect() {
       try {
-        const response = await axios.get(`https://url-shortener-backend-6666.onrender.com/${slug}`);
-        if (response?.request?.responseURL) {
-          window.location.href = response.request.responseURL;
+        const response = await axios.get(`https://url-shortener-backend-6666.onrender.com/${slug}`, {
+          responseType: 'text' // tell axios to read as raw text
+        });
+
+        const originalUrl = response.data;
+
+        if (originalUrl.startsWith('http')) {
+          window.location.replace(originalUrl); // 🚀 true redirect
         } else {
           window.location.href = '/404';
         }
